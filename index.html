@@ -133,7 +133,7 @@
                         },
                         data: JSON.stringify({
                         nombre: e.target.nombre.value,
-                        area: e.target.area.value
+                        descripcion: e.target.descripcion.value
                         })
                     },
                     res = await axios(`${servUrl}/${e.target.id.value}`, options),
