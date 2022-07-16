@@ -1,0 +1,24 @@
+{
+  "peliculas": [
+    {
+      "id": 1,
+      "nombre": "El rey Leon (1994)",
+      "descripcion": "La sabana africana es el escenario en el que rienen lugar las aventuras de Simba, un pequño leon que es el heredero del trono."
+    },
+    {
+      "id": 2,
+      "nombre": "Toy Story(1995)",
+      "descripcion": "Los juguetes de Andy, un niño de 6 años, temen que haya llegado su hora y que un nuevo regalo de cumpleaños les destruya en el corazon de su dueño"
+    },
+    {
+      "id": 3,
+      "nombre": "Shrek(2001)",
+      "descripcion": "Hace mucho tiempo, un feroz ogro llamado Shrek. Vivia tranquilamente, un dia, su soledad se ve interrumpida por una invasión de sorprendentes personajes."
+    },
+    {
+      "id": 4,
+      "nombre": "Frozen(2013)",
+      "descripcion": "Cuando una profecía condena a un reino a vivir en invierno eterno, la joven Anna,el temerario montañero Kristoff y el reno Sven emprenden un viaje épico en busca de Elsa."
+    }
+  ]
+}

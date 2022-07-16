@@ -1,0 +1,182 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Document</title>
+    <link rel="stylesheet" href="/css/index.css">
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h1 class="titulo">CARTELERA CINEFORO</h1>
+        </div>
+        <section class="crud">
+            <div class="datos-header">
+                <!--Formulario de ingreso/edicion/consulta -->
+                <article>
+                    <h2 class="crud-title">Ingresar nueva Pelicula</h2>
+                    <form class="crud-form">
+                    <input class="nom" type="text" name="nombre" placeholder="Nombre" required>
+                    <input class="des" type="text" name="descripcion" placeholder="Descripcion" required>
+                    <input class="btnEnviar" type="submit" value="Enviar">
+                    <!--Input con Id Auxiliar-->
+                    <input type="hidden" name="id">
+                    </form>
+                    <br>
+                </article>
+            </div>
+            <div class="datos">
+                <!-- Tabla con lista de registros recuperados -->
+                <article>
+                    <h2 class="crud-subtitle">Listado de Peliculas</h2>
+                    <table class="crud-table">
+                    <thead class="tabla-head">
+                        <tr>
+                        <th>Nombre</th>
+                        <th>Descripcion</th>
+                        <th class="herra">Herramientas</th>
+                        </tr>
+                    </thead>
+                    <tbody></tbody>
+                    </table>
+                </article>
+            </div>
+        </section>
+        <!-- Template para rellenar tabla de datos -->
+        <template id="crud-template">
+        <tr>
+            <td class="nombre"></td>
+            <td class="descripcion"></td>
+            <td>
+            <button class="edit">Editar</button>
+            <button class="delete">Eliminar</button>
+            </td>
+        </tr>
+        </template>
+    </div>
+    
+    <!-- Referenca a la libreria de AXIOS -->
+    <script src="https://cdn.jsdelivr.net/npm/axios/dist/axios.min.js"></script>
+    
+    <!-- Codigo de JS -->
+    <script>
+        const d = document;
+        const servUrl = "http://localhost:5555/peliculas",
+        $table = d.querySelector(".crud-table"),
+        $form = d.querySelector(".crud-form"),
+        $title = d.querySelector(".crud-title"),
+        $template = d.getElementById("crud-template").content,
+        $fragment = d.createDocumentFragment();
+    
+        /* Logica para recuperar todos los registros de la API "falsa" */
+        const getAll = async () => {
+        try {
+            let res = await axios.get(servUrl),
+            peliculas = await res.data;
+    
+            peliculas.forEach(el => {
+                $template.querySelector(".nombre").textContent = el.nombre;
+                $template.querySelector(".descripcion").textContent = el.descripcion;
+                $template.querySelector(".edit").dataset.id = el.id;
+                $template.querySelector(".edit").dataset.nombre = el.nombre;
+                $template.querySelector(".edit").dataset.descripcion = el.descripcion;
+                $template.querySelector(".delete").dataset.id = el.id;
+    
+                let $clone = d.importNode($template, true);
+                $fragment.appendChild($clone);
+            });
+    
+            $table.querySelector("tbody").appendChild($fragment);
+        } catch (err) {
+            let message = err.statusText || "Error al obtener los datos.";
+            $table.insertAdjacentHTML("afterend", `<p><b>Error ${err.status}: ${message}</b></p>`);
+        }
+    }
+    
+    d.addEventListener("DOMContentLoaded", getAll);
+    
+    d.addEventListener("submit", async e => {
+        if (e.target === $form) {
+        e.preventDefault();//Deshabilito la accion por default del form.
+            if (!e.target.id.value) {
+                //Create - POST
+                try {
+                    let options = {
+                        method: "POST",
+                        headers: {
+                        "Content-type": "application/json; charset=utf-8"
+                        },
+                        data: JSON.stringify({
+                            nombre: e.target.nombre.value,
+                            descripcion: e.target.descripcion.value
+                        })
+                    },
+                    res = await axios(servUrl, options),
+                    json = await res.data;
+                    location.reload();
+                    //Limpiar inputs
+                    e.target.nombre.value = "";
+                    e.target.descripcion.value = "";
+                } catch (err) {
+                    let message = err.statusText || "Ocurrió un error al agregar una pelicula";
+                    $form.insertAdjacentHTML("afterend", `<p><b>Error ${err.status}: ${message}</b></p>`);
+                }
+            } else {
+                //Update - PUT
+                try {
+                    let options = {
+                        method: "PUT",
+                        headers: {
+                        "Content-type": "application/json; charset=utf-8"
+                        },
+                        data: JSON.stringify({
+                        nombre: e.target.nombre.value,
+                        area: e.target.area.value
+                        })
+                    },
+                    res = await axios(`${servUrl}/${e.target.id.value}`, options),
+                    json = await res.data;
+    
+                    location.reload();
+                    //Limpiar inputs
+                    e.target.nombre.value = "";
+                    e.target.area.value = "";
+                } catch (err) {
+                    let message = err.statusText || "Ocurrió un error al actulizar datos.";
+                    $form.insertAdjacentHTML("afterend", `<p><b>Error ${err.status}: ${message}</b></p>`);
+                }
+            }
+        }
+    });
+    d.addEventListener("click", async e => {
+        if (e.target.matches(".edit")) {
+            $title.textContent = "Modificacion de datos";
+            $form.nombre.value = e.target.dataset.nombre;
+            $form.descripcion.value = e.target.dataset.descripcion;
+            $form.id.value = e.target.dataset.id;
+        }
+        if (e.target.matches(".delete")) {
+            let isDelete = confirm(`¿Estás seguro de eliminar esta pelicula ${e.target.dataset.id}?`);
+            if (isDelete) {
+                try {
+                    let options = {
+                        method: "DELETE",
+                        headers: {
+                        "Content-type": "application/json; charset=utf-8"
+                        }
+                    },
+                        res = await axios(`${servUrl}/${e.target.dataset.id}`, options),
+                        json = await res.data; 
+                    location.reload();
+                } catch (err) {
+                    let message = err.statusText || "Se detecto un error, que no permite borrar la pelicula.";
+                    alert(`Error ${err.status}: ${message}`);
+                }
+            }
+        }
+    });
+    </script>
+</body>
+</html>
